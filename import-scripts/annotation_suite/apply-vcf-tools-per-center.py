@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 
 import argparse
-import csv
+import merge_mafs
 import os
-import re
-import shutil
 import subprocess
 import sys
-
 # ------------------------------------------------------------------------------------------------------------
 # Functions for generating executable commands
 # being called on a per file basis
@@ -31,35 +28,12 @@ import sys
     'retain-format=s' => \$retain_format,
     'remap-chain=s' => \$remap_chain,
     'add-filters!' => \$add_filters
+
 def generate_vcf2vcf_call(lib, root_directory, temp_directory):
     vcf2vcf_call = 'perl ' + lib + '/generate-clinical-subset.py --study-id=' + cancer_study_id + ' --clinical-file=' + source_directory + '/data_clinical.txt --filter-criteria="PATIENT_ID=' + patient_list + '" --subset-filename=' + destination_directory + "/subset_file.txt"
     return vcf2vcf_call
 
-
-# ------------------------------------------------------------------------------------------------------------
-# general call
-'python standardize_mutation_data.py --input-directory [path/to/input/directory] --output-directory [path/to/output/directory] --center [default name for center] --sequence-source [WGS | WXS] --extensions [comma-delimited list of extensions]'
-
-# assuming it does exactly what cyriac's script does minus the annotation
-# one center per call because it's organized with all center files in one directory
-# confirm whether sequence source always the same for all vcfs/mafs per center
-# if not, pain in the butt - have to map sequence source per vcf/maf
-#
-# example call
-'python vcf2maf.py --input-directory centerA --output-directory tmp/centerA --center centerA --sequence-source <?> --extensions .vcf, .txt/.maf'
-
-def generate_vcf2maf_call(lib, root_directory, temp_directory):
-    vcf2maf_call = 'python ' + lib + '/vcf2maf.py --study-id=' + cancer_study_id + ' --clinical-file=' + source_directory + '/data_clinical.txt --filter-criteria="PATIENT_ID=' + patient_list + '" --subset-filename=' + destination_directory + "/subset_file.txt"
-    return vcf2vcf_call
-# ------------------------------------------------------------------------------------------------------------
-
-
-
-# ------------------------------------------------------------------------------------------------------------
-def generate_merge_mafs_call(lib, input_mafs, output_maf):
-    merge_mafs_call = 'python merge_mafs.py -i %s -o %s' % (input_mafs, output_maf)
-    return merge_mafs_call     
-
+def generate_vcf2maf_call(lib, root_director
 # ------------------------------------------------------------------------------------------------------------
 def main():
     parser = argparse.ArgumentParser()
@@ -67,7 +41,9 @@ def main():
     parser.add_argument("-i", "--input-directory", help = "comma-delimited directories (distinguished by center) to converted", required = True)
     parser.add_argument("-t", "--temp-directory", help = "temp directory for processing", required = True)
     parser.add_argument('-c', '--center', help = "Center name", required = False)
-    parser.add_argument('-s', '--sequence-source', help = "Sequencing source (standard MAF field = 'Sequencing_Source'), e.g., WXS or WGS", required = False)
+    
+    # ignore for now
+    # parser.add_argument('-s', '--sequence-source', help = "Sequencing source (standard MAF field = 'Sequencing_Source'), e.g., WXS or WGS", required = False)
 
     sequencing_source - differs my panels
     args = parser.parse_args()
