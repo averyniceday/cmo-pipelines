@@ -23,8 +23,8 @@ def annotate_maf_call(annotator, input_maf, output_maf):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--annotator-jar", help = "path to annotator jar", required = True)
-    parser.add_argument("-i", "--input-mafs", help = "comma-delimited directories (distinguished by center) to converted", required = True)
-    parser.add_argument("-o", "--output-maf", help = "temp directory for processing", required = True)
+    parser.add_argument("-i", "--input-mafs", help = "comma-delimited list of paths to mafs for merging", required = True)
+    parser.add_argument("-o", "--output-maf", help = "output maf name", required = True)
         
     args = parser.parse_args()
     annotator_jar = args.annotator_jar

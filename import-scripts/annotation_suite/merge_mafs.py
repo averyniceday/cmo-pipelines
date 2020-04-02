@@ -1,3 +1,6 @@
+import os
+import sys
+import argparse
 # Script for mergining MAFs
 # Creates one aggregate header taken from column names acorss MAFs
 # Writes out rows while mapping to header
@@ -62,20 +65,21 @@ def merge_input_mafs(input_mafs, output_mafs):
         output_maf.write("\n".join(rows_to_write) + "\n")
 
 def run(input_mafs, output_maf):
-    for input_maf in input_mafs:
+    input_maf_list = map(str.strip, input_mafs.split(','))
+    for input_maf in input_maf_list:
         if not os.path.isfile(input_maf):
             print input_maf + " cannot be found. Exiting..."
             exit(1)
         
-    merge_input_mafs(input_mafs, output_maf)
+    merge_input_mafs(input_maf_list, output_maf)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--input-filenames", help = "comma-deliited list of MAFs to merge", required = True)
-    parser.add_argument("-o", "--output-filename", help = "output filename for merged MAF", required = True)
+    parser.add_argument("-i", "--input-mafs", help = "comma-deliited list of MAFs to merge", required = True)
+    parser.add_argument("-o", "--output-maf", help = "output filename for merged MAF", required = True)
 
     args = parser.parse_args()
-    input_mafs = map(str.strip, args.input_filenames.split(','))
-    output_maf = args.out_filename
+    input_mafs = args.input_mafs
+    output_maf = args.output_maf
     
     run(input_mafs, output_maf)
