@@ -33,7 +33,10 @@
 package org.cbioportal.cmo.pipelines.cvr.model.staging;
 
 import java.util.*;
+
+import com.google.common.base.Strings;
 import org.cbioportal.cmo.pipelines.cvr.model.CVRSvVariant;
+import org.cbioportal.cmo.pipelines.cvr.model.GMLCnvIntragenicVariant;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 
 /**
@@ -72,6 +75,7 @@ public class CVRSvRecord {
     private String tumor_read_count;
     private String tumor_variant_count;
     private String variant_status_name;
+    private String sv_status;
 
     public CVRSvRecord() {
     }
@@ -105,7 +109,48 @@ public class CVRSvRecord {
         this.tumor_read_count = variant.getTumor_Read_Count();
         this.tumor_variant_count = variant.getTumor_Variant_Count();
         this.variant_status_name = variant.getVariant_Status_Name();
+        this.sv_status = "SOMATIC";
     }
+
+    public CVRSvRecord(GMLCnvIntragenicVariant variant, String sampleId) {
+        this.sampleId = sampleId;
+        this.comments = (!Strings.isNullOrEmpty(variant.getInterpretation())) ? variant.getInterpretation().replaceAll("[\\t\\n\\r]+"," ") : "";
+        // set event_info and sv_class
+        this.site1_gene = variant.getGeneId().trim();
+        this.site1_chrom = variant.getChromosome();
+        this.comments = (!Strings.isNullOrEmpty(variant.getInterpretation())) ? variant.getInterpretation().replaceAll("[\\t\\n\\r]+"," ") : "";
+        this.sv_status = "GERMLINE";
+        if (!Strings.isNullOrEmpty(variant.getCnvClassName())) {
+            String svClass = variant.getCnvClassName();
+            String eventInfo = variant.getCnvClassName().trim().replace("INTRAGENIC_", "");
+            this.event_info += " " + eventInfo.toLowerCase();
+            this.sv_class_name = variant.getCnvClassName();
+        }
+
+        this.annotation = "";
+        this.breakpoint_type = "";
+        this.confidence_class = "";
+        this.conn_type = "";
+        this.connection_type = "";
+        this.mapq = "";
+        this.normal_read_count = "";
+        this.normal_variant_count = "";
+        this.paired_end_read_support = "";
+        this.site1_desc = "";
+        this.site1_pos = "";
+        this.site2_chrom = "";
+        this.site2_desc = "";
+        this.site2_gene = "";
+        this.site2_pos = "";
+        this.split_read_support = "";
+        this.sv_desc = "";
+        this.sv_length = "";
+        this.sv_variant_id = "";
+        this.tumor_read_count = "";
+        this.tumor_variant_count = "";
+        this.variant_status_name = "";
+    }
+
     public String getSampleId(){
         return sampleId != null ? this.sampleId : "";
     }
@@ -329,7 +374,11 @@ public class CVRSvRecord {
     public void setVariant_Status_Name(String variantStatusName){
         this.variant_status_name = variantStatusName;
     }
-    
+
+    public String getSv_Status() { return this.sv_status != null ? this.sv_status : ""; }
+
+    public void setSv_Status(String sv_status) { this.sv_status = sv_status; }
+
     public static List<String> getFieldNames() {
         List<String> fieldNames = new ArrayList<String>();
         fieldNames.add("SampleId");
@@ -360,6 +409,7 @@ public class CVRSvRecord {
         fieldNames.add("Tumor_Read_Count");
         fieldNames.add("Tumor_Variant_Count");
         fieldNames.add("Variant_Status_Name");
+        fieldNames.add("Sv_Status");
         return fieldNames;
     }
 }
