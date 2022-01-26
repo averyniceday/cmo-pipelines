@@ -167,7 +167,7 @@ public class BatchConfiguration {
                 .next(clinicalStep())
                 .next(mutationsStepFlow())
                 .next(cnaStepFlow())
-                .next(svFusionsStepFlow())
+                .next(svStepFlow())
                 .next(genePanelStep())
                 .build();
     }
@@ -181,7 +181,7 @@ public class BatchConfiguration {
                 .next(clinicalStep())
                 .next(mutationsStepFlow())
                 .next(cnaStepFlow())
-                .next(svFusionsStepFlow())
+                .next(svStepFlow())
                 .next(segmentStepFlow())
                 .next(genePanelStep())
                 .next(cvrRequeueStep())
@@ -222,13 +222,12 @@ public class BatchConfiguration {
     }
 
     @Bean
-    public Flow svFusionsStepFlow() {
-        return new FlowBuilder<Flow>("svFusionsStepFlow")
-                .start(svFusionsStepExecutionDecider())
+    public Flow svStepFlow() {
+        return new FlowBuilder<Flow>("svStepFlow")
+                .start(svStepExecutionDecider())
                     .on("RUN")
                         .to(svStep())
-                        .next(fusionStep())
-                .from(svFusionsStepExecutionDecider())
+                .from(svStepExecutionDecider())
                     .on("SKIP")
                         .end()
                 .build();
@@ -369,16 +368,6 @@ public class BatchConfiguration {
                 .reader(svDataReader())
                 .processor(svDataProcessor())
                 .writer(svDataWriter())
-                .build();
-    }
-
-    @Bean
-    public Step fusionStep() {
-        return stepBuilderFactory.get("fusionStep")
-                .<CVRFusionRecord, String> chunk(chunkInterval)
-                .reader(fusionDataReader())
-                .processor(fusionDataProcessor())
-                .writer(fusionDataWriter())
                 .build();
     }
 
@@ -603,12 +592,6 @@ public class BatchConfiguration {
 
     @Bean
     @StepScope
-    public ItemStreamReader<CVRFusionRecord> fusionDataReader() {
-        return new CVRFusionDataReader();
-    }
-
-    @Bean
-    @StepScope
     public ItemStreamReader<CVRFusionRecord> gmlFusionDataReader() {
         return new GMLFusionDataReader();
     }
@@ -776,7 +759,7 @@ public class BatchConfiguration {
     }
 
     @Bean
-    public JobExecutionDecider svFusionsStepExecutionDecider() {
+    public JobExecutionDecider svStepExecutionDecider() {
         return decideStepExecutionByDatatypeForStudyId("sv-fusions");
     }
 
