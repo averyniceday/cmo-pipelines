@@ -61,11 +61,13 @@ public class CVRSvRecord {
     private String paired_end_read_support;
     private String site1_chrom;
     private String site1_desc;
+    private String site1_exon;
     private String site1_gene;
     private String site1_pos;
     private String site2_chrom;
     private String site2_desc;
     private String site2_gene;
+    private String site2_exon;
     private String site2_pos;
     private String split_read_support;
     private String sv_class_name;
@@ -110,6 +112,20 @@ public class CVRSvRecord {
         this.tumor_variant_count = variant.getTumor_Variant_Count();
         this.variant_status_name = variant.getVariant_Status_Name();
         this.sv_status = "SOMATIC";
+
+        // CVR confirmed Site1_GENE/Gene1 is a NOT_NULL field
+        // Use Gene1 to test whether v1 or v2 schema
+        if (variant.getSite1_Gene() != null && !variant.getSite1_Gene().isEmpty()) {
+            this.site1_gene = variant.getSite1_Gene();
+            this.site2_gene = variant.getSite2_Gene();
+            this.site1_exon = variant.getSite1_Exon();
+            this.site2_exon = variant.getSite2_Exon();
+        } else {
+            this.site1_gene = variant.getGene1();
+            this.site2_gene = variant.getGene2();
+            this.site1_exon = variant.getExon1();
+            this.site2_exon = variant.getExon2();
+        }
     }
 
     public CVRSvRecord(GMLCnvIntragenicVariant variant, String sampleId) {
@@ -137,9 +153,11 @@ public class CVRSvRecord {
         this.normal_variant_count = "";
         this.paired_end_read_support = "";
         this.site1_desc = "";
+        this.site1_exon = "";
         this.site1_pos = "";
         this.site2_chrom = "";
         this.site2_desc = "";
+        this.site2_exon = "";
         this.site2_gene = "";
         this.site2_pos = "";
         this.split_read_support = "";
@@ -379,6 +397,22 @@ public class CVRSvRecord {
 
     public void setSv_Status(String sv_status) { this.sv_status = sv_status; }
 
+    public String getSite1_Exon() {
+        return site1_exon;
+    }
+
+    public void setSite1_Exon(String site1_exon) {
+        this.site1_exon = site1_exon;
+    }
+
+    public String getSite2_Exon() {
+        return site2_exon;
+    }
+
+    public void setSite2_Exon(String site2_exon) {
+        this.site2_exon = site2_exon;
+    }
+    
     public static List<String> getFieldNames() {
         List<String> fieldNames = new ArrayList<String>();
         fieldNames.add("SampleId");
@@ -395,10 +429,12 @@ public class CVRSvRecord {
         fieldNames.add("Paired_End_Read_Support");
         fieldNames.add("Site1_Chrom");
         fieldNames.add("Site1_Desc");
+        fieldNames.add("Site1_Exon");
         fieldNames.add("Site1_Gene");
         fieldNames.add("Site1_Pos");
         fieldNames.add("Site2_Chrom");
         fieldNames.add("Site2_Desc");
+        fieldNames.add("Site2_Exon");
         fieldNames.add("Site2_Gene");
         fieldNames.add("Site2_Pos");
         fieldNames.add("Split_Read_Support");

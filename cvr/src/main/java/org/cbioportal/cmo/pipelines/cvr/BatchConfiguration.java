@@ -45,7 +45,6 @@ import org.cbioportal.cmo.pipelines.cvr.model.staging.CVRClinicalRecord;
 import org.cbioportal.cmo.pipelines.cvr.clinical.*;
 import org.cbioportal.cmo.pipelines.cvr.cna.*;
 import org.cbioportal.cmo.pipelines.cvr.consume.*;
-import org.cbioportal.cmo.pipelines.cvr.fusion.*;
 import org.cbioportal.cmo.pipelines.cvr.genepanel.*;
 import org.cbioportal.cmo.pipelines.cvr.linkedimpactcase.*;
 import org.cbioportal.cmo.pipelines.cvr.samplelist.CvrSampleListsTasklet;
