@@ -35,6 +35,7 @@ package org.cbioportal.cmo.pipelines.cvr.model.staging;
 import java.util.*;
 import org.cbioportal.cmo.pipelines.cvr.model.CVRSvVariant;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import com.google.common.base.Strings;
 
 /**
  *
@@ -58,11 +59,13 @@ public class CVRSvRecord {
     private String paired_end_read_support;
     private String site1_chrom;
     private String site1_desc;
+    private String site1_exon;
     private String site1_gene;
     private String site1_pos;
     private String site2_chrom;
     private String site2_desc;
     private String site2_gene;
+    private String site2_exon;
     private String site2_pos;
     private String split_read_support;
     private String sv_class_name;
@@ -91,11 +94,9 @@ public class CVRSvRecord {
         this.paired_end_read_support = variant.getPaired_End_Read_Support();
         this.site1_chrom = variant.getSite1_Chrom();
         this.site1_desc = variant.getSite1_Desc();
-        this.site1_gene = variant.getSite1_Gene();
         this.site1_pos = variant.getSite1_Pos();
         this.site2_chrom = variant.getSite2_Chrom();
         this.site2_desc = variant.getSite2_Desc();
-        this.site2_gene = variant.getSite2_Gene();
         this.site2_pos = variant.getSite2_Pos();
         this.split_read_support = variant.getSplit_Read_Support();
         this.sv_class_name = variant.getSv_Class_Name();
@@ -105,7 +106,22 @@ public class CVRSvRecord {
         this.tumor_read_count = variant.getTumor_Read_Count();
         this.tumor_variant_count = variant.getTumor_Variant_Count();
         this.variant_status_name = variant.getVariant_Status_Name();
+
+        // CVR confirmed Site1_GENE/Gene1 is a NOT_NULL field
+        // Use Gene1 to test whether v1 or v2 schema
+        if (variant.getSite1_Gene() != null && !variant.getSite1_Gene().isEmpty()) {
+            this.site1_gene = variant.getSite1_Gene();
+            this.site2_gene = variant.getSite2_Gene() != null ? variant.getGene2() : "";
+            this.site1_exon = variant.getSite1_Exon() != null ? variant.getSite1_Exon() : "";
+            this.site2_exon = variant.getSite2_Exon() != null ? variant.getSite2_Exon() : "";
+        } else {
+            this.site1_gene = variant.getGene1();
+            this.site2_gene = variant.getGene2() != null ? variant.getGene2() : "";
+            this.site1_exon = variant.getExon1() != null ? variant.getExon1() : "";
+            this.site2_exon = variant.getExon2() != null ? variant.getExon2() : "";
+        }
     }
+
     public String getSampleId(){
         return sampleId != null ? this.sampleId : "";
     }
@@ -329,7 +345,23 @@ public class CVRSvRecord {
     public void setVariant_Status_Name(String variantStatusName){
         this.variant_status_name = variantStatusName;
     }
-    
+
+    public String getSite1_Exon() {
+        return site1_exon;
+    }
+
+    public void setSite1_Exon(String site1_exon) {
+        this.site1_exon = site1_exon;
+    }
+
+    public String getSite2_Exon() {
+        return site2_exon;
+    }
+
+    public void setSite2_Exon(String site2_exon) {
+        this.site2_exon = site2_exon;
+    }
+
     public static List<String> getFieldNames() {
         List<String> fieldNames = new ArrayList<String>();
         fieldNames.add("SampleId");
@@ -346,10 +378,12 @@ public class CVRSvRecord {
         fieldNames.add("Paired_End_Read_Support");
         fieldNames.add("Site1_Chrom");
         fieldNames.add("Site1_Desc");
+        fieldNames.add("Site1_Exon");
         fieldNames.add("Site1_Gene");
         fieldNames.add("Site1_Pos");
         fieldNames.add("Site2_Chrom");
         fieldNames.add("Site2_Desc");
+        fieldNames.add("Site2_Exon");
         fieldNames.add("Site2_Gene");
         fieldNames.add("Site2_Pos");
         fieldNames.add("Split_Read_Support");
