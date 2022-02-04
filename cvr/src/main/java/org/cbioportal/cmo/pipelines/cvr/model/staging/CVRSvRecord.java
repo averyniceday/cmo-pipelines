@@ -412,7 +412,7 @@ public class CVRSvRecord {
     public void setSite2_Exon(String site2_exon) {
         this.site2_exon = site2_exon;
     }
-    
+
     public static List<String> getFieldNames() {
         List<String> fieldNames = new ArrayList<String>();
         fieldNames.add("SampleId");
