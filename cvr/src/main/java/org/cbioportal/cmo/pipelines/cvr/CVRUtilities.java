@@ -321,7 +321,7 @@ public class CVRUtilities {
         String matchNormValidationAllele2 = "";
         String verificationStatus = "";
         String validationStatus = VALIDATION_STATUS_UNKNOWN;
-        String mutationStatus = StringUtils.isEmpty(snp.getPathScore()) ? "GERMLINE" : "GERMLINE - " + snp.getPathScore();
+        String mutationStatus = "GERMLINE"
         String sequencingPhase = "";
         String sequencingSource = "";
         String validationMethod = "";
@@ -338,8 +338,10 @@ public class CVRUtilities {
         String aminoAcidChange = snp.getAaChange();
         String transcript = snp.getTranscriptId();
         String comments = (snp.getInterpretation() != null ? snp.getInterpretation() : "").replaceAll("\r\n", " ").replaceAll("\t", " ").replaceAll("\n", " ").replaceAll("\r", " ");
+	String pathogenicityScore = StringUtils.isEmpty(snp.getPathScore()) ? "" : snp.getPathScore(); 
         Map<String ,String> additionalProperties = new LinkedHashMap<>();
         additionalProperties.put("COMMENTS", comments);
+        additionalProperties.put("PATHOGENICITY_SCORE", pathogenicityScore);
         return new MutationRecord(hugoSymbol, entrezGeneId, center, ncbiBuild, chromosome,
                 startPosition, endPosition, strand, variantClassification, variantType, referenceAllele,
                 tumorSeqAllele1, tumorSeqAllele2, dbSnpRs, dbSnpValStatus, tumorSampleBarcode,
