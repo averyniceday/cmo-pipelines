@@ -918,7 +918,10 @@ MY_FLOCK_FILEPATH="/data/portal-cron/cron-lock/fetch-dmp-data-for-import.lock"
         echo "MSKSOLIDHEME merge successful! Creating cancer type case lists..."
         echo $(date)
         # add metadata headers and overrides before importing
-        $PYTHON_BINARY $PORTAL_HOME/scripts/add_clinical_attribute_metadata_headers.py -s mskimpact -f $MSK_SOLID_HEME_DATA_HOME/data_clinical*
+	# specify data_clinical patient/sample for now to avoid overwriting manual additions in supp clin files
+	# TopBraid slow/unresponsive -- go back to wildcard once TopBraid can be updated
+        $PYTHON_BINARY $PORTAL_HOME/scripts/add_clinical_attribute_metadata_headers.py -s mskimpact -f $MSK_SOLID_HEME_DATA_HOME/data_clinical_sample.txt
+        $PYTHON_BINARY $PORTAL_HOME/scripts/add_clinical_attribute_metadata_headers.py -s mskimpact -f $MSK_SOLID_HEME_DATA_HOME/data_clinical_patient.txt
         if [ $? -gt 0 ] ; then
             echo "Error: Adding metadata headers for MSKSOLIDHEME failed! Study will not be updated in portal."
         else
