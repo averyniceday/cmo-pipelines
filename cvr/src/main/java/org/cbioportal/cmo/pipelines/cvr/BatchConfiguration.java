@@ -61,6 +61,7 @@ import java.util.*;
 import javax.sql.DataSource;
 import org.apache.log4j.Logger;
 import org.cbioportal.cmo.pipelines.cvr.smile.SmilePublisherTasklet;
+import org.cbioportal.cmo.pipelines.cvr.cdm.CDMPublisherTasklet;
 import org.mskcc.cmo.messaging.Gateway;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.*;
@@ -81,6 +82,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.init.DataSourceInitializer;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.transaction.PlatformTransactionManager;
+import io.minio.*;
 
 /**
  * @author heinsz
@@ -94,7 +96,7 @@ public class BatchConfiguration {
     public static final String GML_JOB = "gmlJob";
     public static final String GML_JSON_JOB = "gmlJsonJob";
     public static final String CONSUME_SAMPLES_JOB = "consumeSamplesJob";
-    public static final String EMAIL_UTIL= "EmailUtil";
+    public static final String EMAIL_UTIL = "EmailUtil";
 
     @Autowired
     public JobBuilderFactory jobBuilderFactory;
@@ -118,6 +120,14 @@ public class BatchConfiguration {
             log.warn("Unable to connect to NATS server, no samples will be published.");
         }
         return messagingGateway;
+    }
+
+    @Bean
+    public MinioClient cdmMinioClient() {
+        return MinioClient.builder()
+                    .endpoint("tllihpcmind6", 9000, true)
+                    .credentials("T5oTc9bucafzSWPc", "ElJq9x51C6RYeNGY1oB3e8sOqKsCw5pN")
+                    .build();
     }
 
     @Bean
@@ -151,7 +161,7 @@ public class BatchConfiguration {
     @Bean
     public Job cvrJob() {
         return jobBuilderFactory.get(CVR_JOB)
-                .start(cvrResponseStep())
+                .start(cdmPublisherStep())
                 .next(checkCvrReponse())
                     .on("RUN")
                     .to(cvrJobFlow())
@@ -194,10 +204,11 @@ public class BatchConfiguration {
     @Bean
     public Flow cvrJobFlow() {
         return new FlowBuilder<Flow>("cvrJobFlow")
-                .start(cvrSampleListsStep())
-                .next(cvrJsonStep())
-                .next(linkedMskimpactCaseFlow())
-                .next(clinicalStep())
+                //.start(cvrSampleListsStep())
+                //.next(cvrJsonStep())
+                //.next(linkedMskimpactCaseFlow())
+                //.next(clinicalStep())
+                .start(cdmPublisherStep())
                 .next(mutationsStepFlow())
                 .next(cnaStepFlow())
                 .next(svStepFlow())
@@ -421,6 +432,13 @@ public class BatchConfiguration {
     public Step smilePublisherStep() {
         return stepBuilderFactory.get("smilePublisherStep")
                 .tasklet(smilePublisherTasklet())
+                .build();
+    }
+
+    @Bean
+    public Step cdmPublisherStep() {
+        return stepBuilderFactory.get("cdmPublisherStep")
+                .tasklet(cdmPublisherTasklet())
                 .build();
     }
 
@@ -699,6 +717,12 @@ public class BatchConfiguration {
     @StepScope
     public Tasklet smilePublisherTasklet() {
         return new SmilePublisherTasklet();
+    }
+
+    @Bean
+    @StepScope
+    public Tasklet cdmPublisherTasklet() {
+        return new CDMPublisherTasklet();
     }
 
     @Bean
