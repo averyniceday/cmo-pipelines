@@ -212,7 +212,8 @@ public class CVRClinicalDataReader implements ItemStreamReader<CVRClinicalRecord
                 // of samples, we might want a separate sampleToRecordMap for performance
                 if (patientToRecordMap.keySet().contains(mskimpactSeqDate.getPATIENT_ID())) {
                     for(CVRClinicalRecord record : patientToRecordMap.get(mskimpactSeqDate.getPATIENT_ID())) {
-                        if (record.getSAMPLE_ID().equals(mskimpactSeqDate.getSAMPLE_ID())) {
+                        // only overwrite if not already provided by JSON
+                        if (record.getSAMPLE_ID().equals(mskimpactSeqDate.getSAMPLE_ID()) && Strings.isNullOrEmpty(record.getSEQ_DATE())) {
                             record.setSEQ_DATE(mskimpactSeqDate.getSEQ_DATE());
                             break;
                         }
