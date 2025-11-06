@@ -6,8 +6,10 @@ from datetime import timedelta, datetime
 from airflow import DAG
 from airflow.decorators import task
 from airflow.exceptions import AirflowException
+from airflow.models import DagRun
 from airflow.models.param import Param
 from airflow.providers.ssh.operators.ssh import SSHOperator
+from airflow.utils.state import DagRunState
 from airflow.utils.trigger_rule import TriggerRule
 
 args = {
@@ -25,6 +27,22 @@ If any upstream tasks failed, this task will propagate the "Failed" status to th
 @task(trigger_rule=TriggerRule.ONE_FAILED, retries=0)
 def watcher():
     raise AirflowException("Failing task because one or more upstream tasks failed.")
+
+@task
+def check_triage_dag_not_running():
+    """Check if import_triage_dag is running. If so, fail this DAG run."""
+    active_runs = DagRun.find(
+        dag_id="import_triage_dag",
+        state=DagRunState.RUNNING,
+    )
+
+    if active_runs:
+        raise AirflowException(
+            f"import_triage_dag is currently running. "
+            f"Cannot start import_tempo_dag until import_triage_dag completes."
+        )
+
+    return True
 
 with DAG(
     dag_id="import_tempo_dag",
@@ -45,6 +63,11 @@ with DAG(
     creds_dir = "/data/portal-cron/pipelines-credentials"
 
     """
+    Check that import_triage_dag is not running
+    """
+    check_task = check_triage_dag_not_running()
+
+    """
     Clean up data repos within MSK network
     """
     import_tempo_data = SSHOperator(
@@ -55,5 +78,5 @@ with DAG(
         dag=dag,
     )
 
-    import_tempo_data
+    check_task >> import_tempo_data
     list(dag.tasks) >> watcher()
